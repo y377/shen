@@ -57,7 +57,7 @@
             </div>
             <div class="col-md-3 py-3">
                 <label class="form-label">备件位置</label>
-                <input type="text" class="form-control" id="location" value="122库房">
+                <input type="text" class="form-control" id="location" value="120库房">
             </div>
         </div>
         <div class="row justify-content-evenly pt-2">
@@ -110,7 +110,7 @@
         else if (partType === 'AOC线缆') faultLabel = "AOC故障";
         const prefixLine = `${date}现场收到${faultLabel}单号：${orderNo}`;
 
-        document.getElementById('recipients').textContent = recipients.join("\n");
+        // document.getElementById('recipients').textContent = recipients.join("\n");
         document.getElementById('ccList').textContent = ccList.join("\n");
 
         const content = `【江苏仪征闽泰机房】-【库房临时卡申请】\n\nHi：all\n${prefixLine}\n出库需求详情：需要出库「${partType}」，现需要使用资产临时卡进入库房出库备件，请确认。\n\n日期：${date}\n项目需求人：${demander}\n申请人：${applicant}\n需求：机房${faultLabel}工单号：${orderNo}\n备件位置：${location}`;
