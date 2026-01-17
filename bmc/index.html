@@ -1,0 +1,139 @@
+
+
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>工作助手</title>
+  <link rel="stylesheet" href="https://cdn.anssl.cn/bootstrap/css/bootstrap.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.anssl.cn/bootstrap-icons/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+  <script src="https://cdn.anssl.cn/bootstrap/js/bootstrap.bundle.min.js" crossorigin="anonymous" />
+</head>
+
+<body>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+
+            <p class="fw-semibold">申请BMC</p>
+
+
+          <div class="d-flex gap-2">
+            <button id="btnCopy" type="button" class="btn btn-primary btn-sm">
+              复制代码
+            </button>
+            <button id="btnSelect" type="button" class="btn btn-outline-secondary btn-sm">
+              全选
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- “高亮”用 Bootstrap 的深色背景 + 等宽字体来模拟 -->
+          <pre class="m-0 p-3 rounded bg-dark text-light overflow-auto" style="max-height: 420px;">
+<code id="codeBlock" class="d-block" style="white-space: pre;">(() =&gt; {
+  const ORDER_IDX = 1, IPV6_IDX = 7;
+  const getText = (el, sel) =&gt; el?.querySelector(sel)?.textContent ?? el?.textContent ?? "";
+
+  const colCount = document.querySelectorAll("th.sqe-table-th").length;
+  const tds = Array.from(document.querySelectorAll("td.sqe-table-td"));
+  const rowCount = Math.floor(tds.length / colCount);
+
+  const lines = Array.from({ length: rowCount }, (_, r) =&gt; {
+    const order = getText(tds.at(r * colCount + ORDER_IDX), "a.sqe-link");
+    const ipv6  = getText(tds.at(r * colCount + IPV6_IDX), ".sqe-table-cell-wrap-value");
+    return (order || ipv6) ? `单号：${order}\tIPv6：${ipv6}` : null;
+  }).filter(Boolean);
+
+  const out = lines.concat("老师好，申请BMC谢谢！").join("\n");
+  copy(out);
+  console.table(lines);
+  return `已复制 ${lines.length} 条 + 结尾一句话`;
+})();</code>
+          </pre>
+
+          <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <small id="copyHint" class="text-body-secondary">
+              提示：执行后不要从控制台框选复制，直接去飞书/编辑器 Ctrl+V。
+            </small>
+            <span id="copyState" class="badge text-bg-secondary">未复制</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const codeEl = document.getElementById("codeBlock");
+    const btnCopy = document.getElementById("btnCopy");
+    const btnSelect = document.getElementById("btnSelect");
+    const copyState = document.getElementById("copyState");
+
+    const getCodeText = () => codeEl.textContent;
+
+    const selectCode = () => {
+      const range = document.createRange();
+      range.selectNodeContents(codeEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    };
+
+    const setState = (ok) => {
+      if (ok) {
+        copyState.className = "badge text-bg-success";
+        copyState.textContent = "已复制";
+        btnCopy.textContent = "已复制";
+        setTimeout(() => (btnCopy.textContent = "复制代码"), 1200);
+      } else {
+        copyState.className = "badge text-bg-danger";
+        copyState.textContent = "复制失败";
+        btnCopy.textContent = "重试复制";
+      }
+    };
+
+    btnSelect.addEventListener("click", () => {
+      selectCode();
+      copyState.className = "badge text-bg-secondary";
+      copyState.textContent = "已全选";
+      setTimeout(() => {
+        copyState.className = "badge text-bg-secondary";
+        copyState.textContent = "未复制";
+      }, 1200);
+    });
+
+    btnCopy.addEventListener("click", async () => {
+      const text = getCodeText();
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          setState(true);
+          return;
+        }
+        // fallback：旧环境
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        setState(true);
+      } catch (e) {
+        // 再退一步：帮你全选，方便手动 Ctrl+C
+        selectCode();
+        setState(false);
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
